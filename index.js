@@ -1,3 +1,8 @@
-// run `node index.js` in the terminal
+const express = require('express');
+const app = express();
 
-console.log(`Hello Node.js v${process.versions.node}!`);
+app.get('/', (req, res) => {
+  res.send('Hello from Vercel API!');
+});
+
+module.exports = app;
