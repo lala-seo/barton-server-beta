@@ -8,66 +8,54 @@ const crypto = require('crypto');
 // @access  Public
 exports.subscribe = async (req, res) => {
   try {
-    const { error, value } = validateSubscriber(req.body);
-    if (error) {
-      return res.status(400).json({
-        success: false,
-        message: error.details[0].message
-      });
-    }
+    const value = req.body;
+
 
     // Check if already subscribed
     const existingSubscriber = await Subscriber.findOne({ email: value.email });
     if (existingSubscriber) {
-      if (existingSubscriber.isActive) {
-        return res.status(400).json({
-          success: false,
-          message: 'Email already subscribed'
-        });
-      } else {
-        // Reactivate subscription
-        existingSubscriber.isActive = true;
-        existingSubscriber.interests = value.interests || existingSubscriber.interests;
-        existingSubscriber.subscribedAt = new Date();
-        existingSubscriber.unsubscribedAt = null;
-        existingSubscriber.ipAddress = req.ip;
-        existingSubscriber.userAgent = req.get('User-Agent');
-        await existingSubscriber.save();
+      return res.status(400).json({
+        success: false,
+        message: 'Email already subscribed'
+      });
+    } else {
+      // Reactivate subscription
+      value.isActive = true;
+      const sub = await Subscriber.create(value);
 
-        // Send welcome email
-        try {
-          await emailService.sendSubscriptionConfirmation(existingSubscriber);
-        } catch (emailError) {
-          console.error('Subscription confirmation email failed:', emailError);
-        }
+      // Send welcome email
+      // try {
+      //   await emailService.sendSubscriptionConfirmation(existingSubscriber);
+      // } catch (emailError) {
+      //   console.error('Subscription confirmation email failed:', emailError);
+      // }
 
-        return res.status(200).json({
-          success: true,
-          message: 'Subscription reactivated successfully',
-          data: existingSubscriber
-        });
-      }
+      return res.status(200).json({
+        success: true,
+        message: 'Subscribed successfully',
+        data: sub
+      });
     }
 
-    // Add metadata
-    value.ipAddress = req.ip;
-    value.userAgent = req.get('User-Agent');
-    value.verificationToken = crypto.randomBytes(32).toString('hex');
+    // // Add metadata
+    // value.ipAddress = req.ip;
+    // value.userAgent = req.get('User-Agent');
+    // value.verificationToken = crypto.randomBytes(32).toString('hex');
 
-    const subscriber = await Subscriber.create(value);
+    // const subscriber = await Subscriber.create(value);
 
-    // Send confirmation email
-    try {
-      await emailService.sendSubscriptionConfirmation(subscriber);
-    } catch (emailError) {
-      console.error('Subscription confirmation email failed:', emailError);
-    }
+    // // Send confirmation email
+    // try {
+    //   await emailService.sendSubscriptionConfirmation(subscriber);
+    // } catch (emailError) {
+    //   console.error('Subscription confirmation email failed:', emailError);
+    // }
 
-    res.status(201).json({
-      success: true,
-      message: 'Subscribed successfully! Please check your email to confirm.',
-      data: subscriber
-    });
+    // res.status(201).json({
+    //   success: true,
+    //   message: 'Subscribed successfully! Please check your email to confirm.',
+    //   data: subscriber
+    // });
   } catch (error) {
     res.status(500).json({
       success: false,
@@ -158,7 +146,7 @@ exports.getSubscribers = async (req, res) => {
 
     // Build query
     let query = {};
-    
+
     if (isActive !== undefined) query.isActive = isActive === 'true';
     if (interests) query.interests = { $in: interests.split(',') };
     if (search) {
@@ -204,7 +192,7 @@ exports.getSubscriberStats = async (req, res) => {
     const totalSubscribers = await Subscriber.countDocuments();
     const activeSubscribers = await Subscriber.countDocuments({ isActive: true });
     const verifiedSubscribers = await Subscriber.countDocuments({ isVerified: true });
-    
+
     // Subscribers by interests
     const interestStats = await Subscriber.aggregate([
       { $match: { isActive: true } },
@@ -262,7 +250,7 @@ exports.updateSubscriber = async (req, res) => {
   try {
     const allowedFields = ['firstName', 'lastName', 'interests', 'isActive'];
     const updateData = {};
-    
+
     Object.keys(req.body).forEach(key => {
       if (allowedFields.includes(key)) {
         updateData[key] = req.body[key];

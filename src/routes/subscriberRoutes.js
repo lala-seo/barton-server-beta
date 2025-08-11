@@ -17,10 +17,6 @@ router.post('/subscribe', subscribe);
 router.get('/verify/:token', verifySubscription);
 router.get('/unsubscribe/:token', unsubscribe);
 
-// Protected routes
-router.use(protect);
-router.use(authorize('admin', 'editor'));
-
 router.route('/')
   .get(getSubscribers);
 

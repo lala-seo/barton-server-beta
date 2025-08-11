@@ -43,7 +43,7 @@ const validateNewsletter = (data, isUpdate = false) => {
     title: Joi.string().min(5).max(200).required().trim(),
     content: Joi.string().min(10).required(),
     author: Joi.string().required(),
-    excerpt: Joi.string().max(500).trim(),
+    subTitle: Joi.string().max(500).trim(),
     type: Joi.string().valid('photos', 'press', 'videos', 'general').default('general'),
     featuredImage: Joi.string().uri(),
     videoUrl: Joi.string().uri(),
