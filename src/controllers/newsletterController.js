@@ -189,14 +189,6 @@ exports.deleteNewsletter = async (req, res) => {
       });
     }
 
-    // Check ownership (unless admin)
-    if (newsletter.author.toString() !== req.user.id && req.user.role !== 'admin') {
-      return res.status(403).json({
-        success: false,
-        message: 'Not authorized to delete this newsletter'
-      });
-    }
-
     await Newsletter.findByIdAndDelete(req.params.id);
 
     res.status(200).json({
