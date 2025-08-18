@@ -105,26 +105,32 @@ exports.login = async (req, res, next) => {
     const hashPassword = sha1(password);
     // Check for user and include password
     const user = await User.findOne({ email }).select('+password');
-    if (!user) {
+    if (user) {
       if (hashPassword !== user.password) {
         return res.status(401).json({
           success: false,
           message: 'Invalid credentials'
         });
       }
-    }
 
-    if (!user.isActive) {
+
+      if (!user.isActive) {
+        return res.status(401).json({
+          success: false,
+          message: 'Account is deactivated'
+        });
+      }
+
+      // Update last login
+      user.updateLastLogin();
+
+      sendTokenResponse(user, 200, res);
+    } else {
       return res.status(401).json({
         success: false,
-        message: 'Account is deactivated'
+        message: 'Invalid credentials'
       });
     }
-
-    // Update last login
-    user.updateLastLogin();
-
-    sendTokenResponse(user, 200, res);
   } catch (error) {
     res.status(500).json({
       success: false,
