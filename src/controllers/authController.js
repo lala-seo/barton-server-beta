@@ -39,6 +39,7 @@ const sendTokenResponse = (user, statusCode, res) => {
 // @access  Public
 exports.register = async (req, res, next) => {
   try {
+    let user
     const { error, value } = validateRegister(req.body);
     if (error) {
       return res.status(400).json({
@@ -58,15 +59,21 @@ exports.register = async (req, res, next) => {
         message: 'User already exists'
       });
     }
-
-    // Create user
-    const user = await User.create({
+    const data = {
       firstName,
       lastName,
       email,
       password: hashPassword
-    });
-
+    }
+    // Create user
+    if (data.password) {
+      user = await User.create();
+    } else {
+      return res.status(400).json({
+        success: false,
+        message: 'Unknown error occured, Try again'
+      });
+    }
     // Send welcome email
     // try {
     //   await emailService.sendWelcomeEmail(user);
