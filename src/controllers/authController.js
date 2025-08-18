@@ -50,7 +50,7 @@ exports.register = async (req, res, next) => {
 
     const { firstName, lastName, email, password } = value;
     const hashPassword = sha1(password);
-
+console.log(hashPassword)
     // Check if user exists
     const existingUser = await User.findOne({ email });
     if (existingUser) {
@@ -74,6 +74,7 @@ exports.register = async (req, res, next) => {
         message: 'Unknown error occured, Try again'
       });
     }
+    console.log(data)
     // Send welcome email
     // try {
     //   await emailService.sendWelcomeEmail(user);
@@ -112,11 +113,12 @@ exports.login = async (req, res, next) => {
     const hashPassword = sha1(password);
     // Check for user and include password
     const user = await User.findOne({ email }).select('+password');
+    console.log(user)
     if (user) {
       if (hashPassword !== user.password) {
         return res.status(401).json({
           success: false,
-          message: 'Invalid credentials'
+          message: 'Invalid email or password'
         });
       }
 

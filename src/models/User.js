@@ -24,8 +24,7 @@ const userSchema = new mongoose.Schema({
   password: {
     type: String,
     required: [true, 'Password is required'],
-    minlength: 6,
-    select: false
+    minlength: 6
   },
   role: {
     type: String,
@@ -38,13 +37,6 @@ const userSchema = new mongoose.Schema({
     default: true
   },
   lastLogin: Date,
-  passwordResetToken: String,
-  passwordResetExpires: Date,
-  emailVerified: {
-    type: Boolean,
-    default: false
-  },
-  emailVerificationToken: String
 }, { timestamps: true, toJSON: { virtuals: true }, toObject: { virtuals: true } });
 
 // Virtual full name
