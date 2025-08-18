@@ -67,7 +67,7 @@ exports.register = async (req, res, next) => {
     }
     // Create user
     if (data.password) {
-      user = await User.create();
+      user = await User.create(data);
     } else {
       return res.status(400).json({
         success: false,
