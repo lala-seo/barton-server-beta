@@ -122,16 +122,12 @@ exports.login = async (req, res, next) => {
         });
       }
 
-
       if (!user.isActive) {
         return res.status(401).json({
           success: false,
           message: 'Account is deactivated'
         });
       }
-
-      // Update last login
-      user.updateLastLogin();
 
       sendTokenResponse(user, 200, res);
     } else {
